@@ -18,6 +18,7 @@ class MyRapidoProfilePage extends StatefulWidget {
 class _MyRapidoProfilePageState extends State<MyRapidoProfilePage> {
   String firstName = '';
   String lastName = '';
+  DateTime? selectedDate;
 
   String get name =>
       [firstName, lastName].where((value) => value.trim().isNotEmpty).join(' ');
@@ -28,6 +29,22 @@ class _MyRapidoProfilePageState extends State<MyRapidoProfilePage> {
   void goBackWithName() {
     widget.onNameChanged?.call(firstName, lastName);
     Navigator.pop(context, displayName);
+  }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2026, 1, 1),
+      lastDate: DateTime.now(),
+      firstDate: DateTime(1900, 1, 1),
+      helpText: "Select Date of Birth",
+    );
+
+    if(picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 
   @override
@@ -106,7 +123,121 @@ class _MyRapidoProfilePageState extends State<MyRapidoProfilePage> {
             showDivider: true,
           ),
           MyProfileDetails(
-            onTap: () {},
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.30,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(28),
+                            topRight: Radius.circular(28),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 8),
+                                  width: 56,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                "Edit Email",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: Colors.white,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.email_outlined),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextField(
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        decoration: InputDecoration(
+                                          hintText: "John@abc.com",
+                                          border: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                  ),
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Save Changes",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 20,
+                        top: -50,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(Icons.close),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: Icons.email_outlined,
             title: "Email",
             subtitle: "Required",
@@ -123,7 +254,9 @@ class _MyRapidoProfilePageState extends State<MyRapidoProfilePage> {
             showDivider: true,
           ),
           MyProfileDetails(
-            onTap: () {},
+            onTap: () async {
+              await selectDate(context);
+            },
             icon: Icons.calendar_month_outlined,
             title: "Date of Birth",
             subtitle: "Required",
